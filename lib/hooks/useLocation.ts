@@ -1,23 +1,28 @@
 // lib/hooks/useLocation.ts
+import { point } from "@turf/turf";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from "react";
+
+export const locationToPoint = (location: LocationState) => {
+  return point([location.longitude, location.latitude]);
+};
 
 /**
  * Rozhraní pro data o geolokaci.
  */
-interface LocationState {
-    latitude: number ;
-    longitude: number ;
-    accuracy?: number;
+export interface LocationState {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
 }
 
 /**
  * Rozhraní pro návratovou hodnotu useLocation hooku.
  */
 interface UseLocationResult {
-    location: LocationState | null;
-    loading: boolean;
-    error: string | null;
+  location: LocationState | null;
+  loading: boolean;
+  error: string | null;
 }
 
 /**
@@ -25,65 +30,148 @@ interface UseLocationResult {
  * Používá standardní Geolocation API.
  * * @returns Objekt s location, loading a error stavy.
  */
-export function useLocation(): UseLocationResult {
-    const [location, setLocation] = useState<LocationState | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+export function useLocation(): UseLocationResult & { refresh: () => void } {
+  const [location, setLocation] = useState<LocationState | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // Kontrola, zda prohlížeč podporuje Geolocation API
-        if (!navigator.geolocation) {
-            setError('Geolocation není v tomto prohlížeči podporována.');
-            setLoading(false);
-            return;
-        }
+  // 1. Vytvoříme samostatnou funkci pro získání polohy
+  const getPosition = useCallback(() => {
+    setLoading(true);
+    const successHandler: PositionCallback = (position) => {
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      });
+      setLoading(false);
+      setError(null);
+    };
 
-        // Funkce pro úspěšné získání pozice
-        const successHandler: PositionCallback = (position) => {
-            setLocation({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                accuracy: position.coords.accuracy,
-            });
-            setLoading(false);
-            setError(null);
-        };
+    // Funkce pro zpracování chyb
+    const errorHandler: PositionErrorCallback = (err) => {
+      console.error(err)
+      let errorMessage = "";
+      switch (err.code) {
+        case err.PERMISSION_DENIED:
+          errorMessage = "Přístup k poloze byl zamítnut uživatelem.";
+          break;
+        case err.POSITION_UNAVAILABLE:
+          errorMessage = "Informace o poloze nejsou dostupné.";
+          break;
+        case err.TIMEOUT:
+          errorMessage = "Vypršel časový limit pro získání polohy.";
+          break;
+        default:
+          errorMessage = `Neznámá chyba: ${err.message}`;
+      }
+      setError(errorMessage);
+      setLoading(false);
+      setLocation(null);
+    };
 
-        // Funkce pro zpracování chyb
-        const errorHandler: PositionErrorCallback = (err) => {
-            let errorMessage = '';
-            switch (err.code) {
-                case err.PERMISSION_DENIED:
-                    errorMessage = 'Přístup k poloze byl zamítnut uživatelem.';
-                    break;
-                case err.POSITION_UNAVAILABLE:
-                    errorMessage = 'Informace o poloze nejsou dostupné.';
-                    break;
-                case err.TIMEOUT:
-                    errorMessage = 'Vypršel časový limit pro získání polohy.';
-                    break;
-                default:
-                    errorMessage = `Neznámá chyba: ${err.message}`;
-            }
-            setError(errorMessage);
-            setLoading(false);
-            setLocation(null);
-        };
+    if (!navigator.geolocation) {
+      setError("Geolocation není podporována.");
+      setLoading(false);
+      return;
+    }
 
-        // Možnosti pro geolokaci (vysoká přesnost, timeout)
-        const options: PositionOptions = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0, // Neukládat do cache staré pozice
-        };
+    const options: PositionOptions = {
+      enableHighAccuracy: false,
+      timeout: 5000,
+      maximumAge: 1000*60*5,
+    };
 
-        // Spuštění sledování polohy (jednorázové získání)
-        navigator.geolocation.getCurrentPosition(successHandler, errorHandler, options);
+    navigator.geolocation.getCurrentPosition(
+      successHandler,
+      errorHandler,
+      options
+    );
+  }, []);
 
-        // Poznámka: Pokud byste chtěli sledovat polohu v reálném čase, 
-        // použili byste navigator.geolocation.watchPosition a vyčistili byste ji v cleanup funkci.
+  // 2. Spustíme ji automaticky při startu
+  useEffect(() => {
+    getPosition();
+  }, [getPosition]);
 
-    }, []); // Prázdné pole závislostí zajistí, že se spustí pouze při mountu komponenty
+  // 3. Vrátíme i funkci refresh, kterou můžeš zavolat odkudkoliv
+  return { location, loading, error, refresh: getPosition };
+}
 
-    return { location, loading, error };
+function handlePermission() {
+  navigator.permissions.query({ name: "geolocation" }).then((result) => {
+    // if (result.state === "granted") {
+    //   report(result.state);
+    //   geoBtn.style.display = "none";
+    // } else if (result.state === "prompt") {
+    //   report(result.state);
+    //   geoBtn.style.display = "none";
+    //   navigator.geolocation.getCurrentPosition(
+    //     revealPosition,
+    //     positionDenied,
+    //     geoSettings,
+    //   );
+    // } else if (result.state === "denied") {
+    //   report(result.state);
+    //   geoBtn.style.display = "inline";
+    // }
+    // result.addEventListener("change", () => {
+    //   report(result.state);
+    // });
+    console.log(result);
+  });
+}
+// export async function useLocationStream(): Promise<LocationState> {
+//   return new Promise<LocationState>((resolve, reject) => {
+//     const watchId = navigator.geolocation.watchPosition(
+//       (position) => {
+//         resolve({
+//           latitude: position.coords.latitude,
+//           longitude: position.coords.longitude,
+//           accuracy: position.coords.accuracy,
+//         });
+//       },
+//       (err) => {
+//         reject(err.message);
+//       },
+//       {
+//         enableHighAccuracy: true,
+//         timeout: 5000,
+//         maximumAge: 0,
+//       }
+//     );
+//   });
+// }
+
+export function useLocationStream() {
+  const [location, setLocation] = useState<LocationState | null>(null);
+  const [error, setError] = useState<string | null>(
+    !navigator.geolocation ? "Geolokace není podporována prohlížečem." : null
+  );
+
+  useEffect(() => {
+    // watchPosition vrací ID, které pak použijeme pro vyčištění (clearWatch)
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+      },
+      (err) => {
+        setError(err.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
+
+    // Cleanup funkce: zastaví sledování, když se komponenta odpojí
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
+  return { location, error };
 }
