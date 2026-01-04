@@ -1,18 +1,15 @@
 "use client";
 import Compas from "@/components/Compas";
 import PubComponent from "@/components/PubComponent";
-import Scene from "@/components/Scene";
-import Test from "@/components/Test";
 import { getClosestPub, Pub } from "@/lib/geo";
-import { LocationState, useLocation } from "@/lib/hooks/useLocation";
-import { Suspense, use, useEffect, useState } from "react";
+import {  useLocation } from "@/lib/hooks/useLocation";
+import {  use, useEffect, useState } from "react";
 import { BrowserView } from "react-device-detect";
 import { toast, ToastContainer } from "react-toastify";
 
 export default function App() {
   const [pubPromise, setPubPromise] = useState<Promise<Pub[]> | null>(null);
   const [excludedPubs, setExcludedPubs] = useState(new Set<number>());
-  const [isMapOpenned, setMapOpenState] = useState(false);
   const { location, loading, error, refresh } = useLocation();
   useEffect(() => {
     if (location) {

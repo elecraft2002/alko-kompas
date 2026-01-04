@@ -1,7 +1,7 @@
 import { Pub } from "@/lib/geo";
 import clsx from "clsx";
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function PubComponent({
   targetPub,

@@ -1,7 +1,6 @@
 "use client";
-import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, OrbitControls, useGLTF } from "@react-three/drei";
+import { Environment,  useGLTF } from "@react-three/drei";
 // import modelPath from "../public/models/compas.gltf";
 
 function CompassIndicator(props: any) {
