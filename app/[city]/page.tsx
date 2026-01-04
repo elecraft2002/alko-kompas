@@ -18,7 +18,7 @@ export async function generateMetadata(
 
   const { city } = await params;
   const includes = cities.find((val) => {
-    return normalize(val.name) === normalize(city);
+    return normalize(val.name) === normalize(decodeURI(city));
   });
   if (!includes) notFound();
   return {
@@ -30,7 +30,7 @@ export async function generateMetadata(
 export async function generateStaticParams() {
   return cities.map((city) => {
     // console.log(city.name)
-    return { city: city.name };
+    return { city: encodeURI(city.name) };
   });
 }
 
