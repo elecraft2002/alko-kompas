@@ -1,7 +1,7 @@
 import App from "@/components/App";
 import cities from "@/lib/cities";
 import { Metadata, ResolvingMetadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import React from "react";
 
 interface Params {
@@ -16,11 +16,12 @@ export async function generateMetadata(
     return str.toUpperCase().replace(" ", "_");
   };
 
-  const { city } = await params;
+  const city = decodeURI((await params).city);
   const includes = cities.find((val) => {
-    return normalize(val.name) === normalize(decodeURI(city));
+    return normalize(val.name) === normalize(city);
   });
-  if (!includes) notFound();
+  console.log({ city, includes });
+  if (!includes) redirect("/");
   return {
     title: `Alko-kompas | ${city}`,
     description: `Jste natolik opilý, že nenajdete další hospodu? Tento problém je minulost. Město ${city} na vás čeká!`,
