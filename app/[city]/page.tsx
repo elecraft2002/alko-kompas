@@ -20,7 +20,6 @@ export async function generateMetadata(
   const includes = cities.find((val) => {
     return normalize(val.name) === normalize(city);
   });
-  console.log(includes);
   if (!includes) notFound();
   return {
     title: `Alko-kompas | ${city}`,
