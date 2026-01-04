@@ -6,6 +6,7 @@ import Test from "@/components/Test";
 import { getClosestPub, Pub } from "@/lib/geo";
 import { LocationState, useLocation } from "@/lib/hooks/useLocation";
 import { Suspense, use, useEffect, useState } from "react";
+import { BrowserView } from "react-device-detect";
 import { toast, ToastContainer } from "react-toastify";
 
 export default function App() {
@@ -40,6 +41,9 @@ export default function App() {
         backgroundPosition: "center",
       }}
     >
+      <BrowserView>
+        <p className="absolute text-red-500">Pro funkční senzory využijte mobilní zařízení</p>
+      </BrowserView>
       <div className="navigation__container grid h-screen ">
         <div className="h-full relative flex justify-center overflow-hidden">
           <Compas targetPosition={pub} />
