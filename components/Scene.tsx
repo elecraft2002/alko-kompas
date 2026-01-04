@@ -24,8 +24,8 @@ export default function Scene({
 }) {
   console.log(alpha)
   return (
-      <Canvas className="h-full" camera={{ position: [0, 2, 5], fov: 75 }}>
-        <color attach="background" args={["#282c34"]} />
+      <Canvas className="h-full w-screen" camera={{ position: [0, 2, 5], fov: 75 }}>
+        {/* <color attach="background" args={["#282c34"]} /> */}
         <ambientLight intensity={0.5} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
         <pointLight position={[-10, -10, -10]} />
