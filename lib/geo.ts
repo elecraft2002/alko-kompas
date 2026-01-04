@@ -96,7 +96,6 @@ export async function getClosestPub(
   targetPoint: LocationState,
   limit = 1
 ): Promise<Pub[]> {
-  console.log("Fetching pubs near:", targetPoint);
 
   const res = await fetchWithRetry(
     `https://nominatim.openstreetmap.org/search?q=pub+near+[${targetPoint.latitude},${targetPoint.longitude}]&format=json&limit=${limit}`,

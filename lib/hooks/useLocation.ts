@@ -119,7 +119,6 @@ function handlePermission() {
     // result.addEventListener("change", () => {
     //   report(result.state);
     // });
-    console.log(result);
   });
 }
 // export async function useLocationStream(): Promise<LocationState> {

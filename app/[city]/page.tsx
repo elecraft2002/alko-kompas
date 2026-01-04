@@ -20,7 +20,6 @@ export async function generateMetadata(
   const includes = cities.find((val) => {
     return normalize(val.name) === normalize(city);
   });
-  console.log({ city, includes });
   if (!includes) redirect("/");
   return {
     title: `Alko-kompas | ${city}`,
@@ -30,7 +29,6 @@ export async function generateMetadata(
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
   return cities.map((city) => {
-    // console.log(city.name)
     return { city: encodeURI(city.name) };
   });
 }

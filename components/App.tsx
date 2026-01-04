@@ -23,7 +23,6 @@ export default function App() {
   const pub =
     pubPromise &&
     use(pubPromise).filter((pub) => {
-      console.log(pub);
       return !excludedPubs.has(pub.place_id);
     })[0];
   useEffect(() => {

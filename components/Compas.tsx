@@ -57,7 +57,6 @@ export default function Compas({
     totalDistance = distance(locationPoint, targetPoint, {
       units: "kilometers",
     });
-    console.log("totalDistance", totalDistance);
     targetBearingDeg = bearingToAzimuth(bearing(locationPoint, targetPoint));
 
     const bearingRad = toRadians(targetBearingDeg);

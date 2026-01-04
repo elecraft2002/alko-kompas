@@ -22,7 +22,6 @@ export default function Scene({
   gamma: number;
   permissionGranted: boolean;
 }) {
-  console.log(alpha);
   return (
     <Canvas
       className="h-full w-screen"
