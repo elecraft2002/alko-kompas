@@ -6,16 +6,19 @@ import Test from "@/components/Test";
 import { getClosestPub, Pub } from "@/lib/geo";
 import { LocationState, useLocation } from "@/lib/hooks/useLocation";
 import { Suspense, use, useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function App() {
   const [pubPromise, setPubPromise] = useState<Promise<Pub[]> | null>(null);
   const [excludedPubs, setExcludedPubs] = useState(new Set<number>());
+  const [isMapOpenned, setMapOpenState] = useState(false);
   const { location, loading, error, refresh } = useLocation();
   useEffect(() => {
     if (location) {
       setPubPromise(getClosestPub(location, excludedPubs.size + 1));
     }
-  }, [location]);
+    if (error) toast(error);
+  }, [location, error]);
 
   const pub =
     pubPromise &&
@@ -27,14 +30,24 @@ export default function App() {
     if (pub) setExcludedPubs((prev) => prev.add(pub.place_id));
   }, [pub]);
   return (
-    <div className="bg-neutral-800">
-      <div className="text-red-500">{error && JSON.stringify(error)}</div>
-      <div className="navigation__container grid h-screen  ">
-        <div className="h-screen relative flex justify-center ">
+    <div
+      style={{
+        background: `linear-gradient(
+          rgba(0, 0, 0, 0.8),
+    rgb(0, 0, 0)
+  ),
+  url("images/background.jpg")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="navigation__container grid h-screen ">
+        <div className="h-full relative flex justify-center overflow-hidden">
           <Compas targetPosition={pub} />
           <PubComponent loading={loading} refresh={refresh} targetPub={pub} />
         </div>
       </div>
+      <ToastContainer theme="dark" />
     </div>
   );
 }

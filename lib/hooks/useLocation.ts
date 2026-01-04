@@ -2,6 +2,7 @@
 import { point } from "@turf/turf";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "react-toastify";
 
 export const locationToPoint = (location: LocationState) => {
   return point([location.longitude, location.latitude]);

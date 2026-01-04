@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { LocationState } from "./hooks/useLocation";
 
 export const toRadians = (degrees: number) => degrees * (Math.PI / 180);
@@ -42,7 +43,6 @@ export function getBearing(
   return bearing; // Vrátí azimut v radiánech od severu
 }
 
-
 export interface Pub {
   place_id: number;
   licence: string;
@@ -62,19 +62,49 @@ export interface Pub {
   boundingbox: string[];
 }
 
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit = {},
+  retries: number = 3,
+  backoff: number = 1000
+): Promise<Response> {
+  try {
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status}`);
+    }
+
+    return response;
+  } catch (error) {
+    // Pokud nám zbývají pokusy, zkusíme to znovu
+    if (retries > 0) {
+      toast(`Fetch selhal, zbývá pokusů: ${retries}. Čekám ${backoff}ms...`);
+
+      // Čekání (Exponential backoff - pokaždé čekáme déle)
+      await new Promise((resolve) => setTimeout(resolve, backoff));
+
+      return fetchWithRetry(url, options, retries - 1, backoff * 2);
+    } else {
+      // Pokud už pokusy nejsou, vyhodíme chybu ven
+      throw error;
+    }
+  }
+}
+
 export async function getClosestPub(
   targetPoint: LocationState,
   limit = 1
 ): Promise<Pub[]> {
   console.log("Fetching pubs near:", targetPoint);
 
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `https://nominatim.openstreetmap.org/search?q=pub+near+[${targetPoint.latitude},${targetPoint.longitude}]&format=json&limit=${limit}`,
     {
       headers: { "User-Agent": "AlkoKompas/1.0" },
     }
   );
-  if (!res.ok) throw new Error("Nepodařilo se načíst data.");
+  if (!res.ok) toast("Nepodařilo se načíst data, zkuste to prosím později.");
   const rawPubs = (await res.json()) as Pub[];
   return rawPubs.map((pub) => {
     return { ...pub, latitude: Number(pub.lat), longitude: Number(pub.lon) };

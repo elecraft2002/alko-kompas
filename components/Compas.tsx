@@ -1,5 +1,5 @@
 "use client";
-import { calculateDistanceToTarget, getBearing, toRadians } from "@/lib/geo";
+import { toRadians } from "@/lib/geo";
 import { distance, bearing, bearingToAzimuth } from "@turf/turf";
 import {
   LocationState,
@@ -7,8 +7,33 @@ import {
   useLocationStream,
 } from "@/lib/hooks/useLocation";
 import { useDeviceOrientation } from "@/lib/orientation";
-import React, { useEffect, useMemo, useState } from "react";
 import Scene from "./Scene";
+import { motion } from "framer-motion";
+
+const Distance = ({ distance }: { distance: number }) => {
+  const formatDistance = (distance: number): string => {
+    if (distance >= 1) return Number((distance * 10).toFixed(0)) / 10 + " Km";
+    return Number((distance * 100).toFixed(0)) * 10 + " m";
+  };
+  return (
+    <div className="w-screen text-center mt-8">
+      {
+        /* distance > 0 */ true && (
+          <motion.p
+            key={"distance"}
+            initial={{ opacity: 0, y: 10 }} // Počáteční stav (průhledný, posunutý dolů)
+            animate={{ opacity: 1, y: 0 }} // Cílový stav (viditelný, na své pozici)
+            exit={{ opacity: 0, y: -10 }} // Stav při zmizení (volitelné)
+            transition={{ duration: 0.5, ease: "easeOut" }} // Nastavení plynulosti
+            className="text-3xl text-amber-200"
+          >
+            {formatDistance(distance)}
+          </motion.p>
+        )
+      }
+    </div>
+  );
+};
 
 export default function Compas({
   targetPosition,
@@ -44,12 +69,17 @@ export default function Compas({
   }
 
   return (
+    <div className="w-full ">
+      <div className="absolute">
+        <Distance distance={totalDistance} />
+      </div>
       <Scene
         absolute={absolute}
         alpha={finalAlpha || 0}
-        beta={beta || 0}
-        gamma={gamma || 0}
+        beta={toRadians(beta || 0)}
+        gamma={toRadians(gamma || 0)}
         permissionGranted={permissionGranted || false}
       />
+    </div>
   );
 }

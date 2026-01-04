@@ -36,8 +36,7 @@ export default function PubComponent({
           loading || refresh();
         }}
         className={clsx(
-          "bg-amber-200 text-neutral-950 py-4 px-6 rounded-full uppercase font-bold cursor-pointer hover:bg-transparent border-2 border-amber-200 hover:text-amber-200 transition-colors",
-          loading && "bg-red-500"
+          "bg-amber-200 text-neutral-950 py-4 px-6 rounded-full uppercase font-bold cursor-pointer hover:bg-transparent border-2 border-amber-200 hover:text-amber-200 transition-colors"
         )}
       >
         Navigovat k další pípě
