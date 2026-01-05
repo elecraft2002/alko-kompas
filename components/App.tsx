@@ -38,9 +38,6 @@ export default function App() {
         backgroundPosition: "center",
       }}
     >
-      <BrowserView>
-        <p className="absolute text-red-500">Pro funkční senzory využijte mobilní zařízení</p>
-      </BrowserView>
       <div className="navigation__container grid h-screen ">
         <div className="h-full relative flex justify-center overflow-hidden">
           <Compas targetPosition={pub} />
