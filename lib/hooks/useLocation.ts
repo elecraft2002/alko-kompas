@@ -79,7 +79,7 @@ export function useLocation(): UseLocationResult & { refresh: () => void } {
 
     const options: PositionOptions = {
       enableHighAccuracy: false,
-      timeout: 5000,
+      timeout: 15000,
       maximumAge: 1000*60*5,
     };
 
@@ -136,7 +136,7 @@ function handlePermission() {
 //       },
 //       {
 //         enableHighAccuracy: true,
-//         timeout: 5000,
+//         timeout: 15000,
 //         maximumAge: 0,
 //       }
 //     );
@@ -164,7 +164,7 @@ export function useLocationStream() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 15000,
         maximumAge: 0,
       }
     );
